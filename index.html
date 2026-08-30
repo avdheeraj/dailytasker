@@ -118,34 +118,16 @@
       box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
     }
 
-    .time-input-wrapper {
-      display: flex;
-      gap: 4px;
-      flex: 1.5;
-      min-width: 150px;
-    }
-
     input[type="time"] {
-      width: 100%;
-      padding: 12px 8px;
+      flex: 1;
+      min-width: 130px;
+      padding: 12px 10px;
       font-size: 14px;
       color: #444;
       background-color: white;
       border: 1px solid rgba(0, 0, 0, 0.08);
       border-radius: 8px;
       outline: none;
-    }
-
-    select.ampm-select {
-      padding: 12px 8px;
-      font-size: 13px;
-      font-weight: 600;
-      background-color: white;
-      border: 1px solid rgba(0, 0, 0, 0.08);
-      border-radius: 8px;
-      outline: none;
-      cursor: pointer;
-      color: #4f46e5;
     }
 
     button.add-btn {
@@ -338,7 +320,7 @@
       .container { padding: 25px 20px; }
       .input-group { gap: 8px; }
       input[type="text"] { flex-basis: 100%; }
-      .time-input-wrapper { flex-grow: 1; }
+      input[type="time"] { flex-grow: 1; }
       button.add-btn { flex-grow: 1; }
     }
   </style>
@@ -352,6 +334,7 @@
       <h2>Aesthetic Daily</h2>
     </div>
 
+    <!-- Progress Bar -->
     <div class="progress-container">
       <div class="progress-label">
         <span>Daily Progress</span>
@@ -362,15 +345,10 @@
       </div>
     </div>
 
+    <!-- Inputs -->
     <div class="input-group">
       <input type="text" id="taskInput" placeholder="Add a ritual or task...">
-      <div class="time-input-wrapper">
-        <input type="time" id="timeInput">
-        <select id="ampmSelect" class="ampm-select">
-          <option value="AM">AM</option>
-          <option value="PM">PM</option>
-        </select>
-      </div>
+      <input type="time" id="timeInput">
       <button class="add-btn" onclick="addTask()">Add Task</button>
     </div>
 
@@ -398,17 +376,11 @@
 
     const getTodayString = () => new Date().toISOString().split('T')[0];
 
-    // Format time display with AM/PM
-    const formatDisplayTime = (timeStr, ampmStr) => {
+    // Converts 24h format (HH:MM) to standard 12h format (h:MM AM/PM)
+    const formatDisplayTime = (timeStr) => {
       if (!timeStr) return "";
       let [hours, minutes] = timeStr.split(":");
       let h = parseInt(hours, 10);
-      
-      if (ampmStr) {
-        h = h % 12 || 12;
-        return `${h}:${minutes} ${ampmStr}`;
-      }
-      
       const ampm = h >= 12 ? "PM" : "AM";
       h = h % 12 || 12;
       return `${h}:${minutes} ${ampm}`;
@@ -434,7 +406,6 @@
           id: taskId,
           name: task.name,
           time: task.time || "",
-          ampm: task.ampm || "",
           completed: isCompletedToday
         });
       });
@@ -459,7 +430,7 @@
         li.id = `task-${task.id}`;
         if (task.completed) li.classList.add("completed");
 
-        const formattedTime = formatDisplayTime(task.time, task.ampm);
+        const formattedTime = formatDisplayTime(task.time);
 
         li.innerHTML = `
           <div class="task-content">
@@ -470,7 +441,7 @@
             ${formattedTime ? `<span class="time-badge">${formattedTime}</span>` : ""}
           </div>
           <div class="actions">
-            <button class="icon-btn" onclick="enableEdit('${task.id}', '${task.name.replace(/'/g, "\\'")}', '${task.time}', '${task.ampm}')">✏️</button>
+            <button class="icon-btn" onclick="enableEdit('${task.id}', '${task.name.replace(/'/g, "\\'")}', '${task.time}')">✏️</button>
             <button class="icon-btn delete-btn" onclick="deleteTask('${task.id}')">✕</button>
           </div>
         `;
@@ -482,13 +453,11 @@
     window.addTask = async () => {
       const nameInput = document.getElementById("taskInput");
       const timeInput = document.getElementById("timeInput");
-      const ampmSelect = document.getElementById("ampmSelect");
       const text = nameInput.value.trim();
       
       if (!text) return;
 
       const selectedTime = timeInput.value;
-      const selectedAmPm = ampmSelect.value;
 
       // Clear fields immediately
       nameInput.value = "";
@@ -497,22 +466,17 @@
       await addDoc(tasksCollection, {
         name: text,
         time: selectedTime,
-        ampm: selectedAmPm,
         lastCompletedDate: null
       });
     };
 
     // Enable Inline Edit Mode
-    window.enableEdit = (id, currentName, currentTime, currentAmPm) => {
+    window.enableEdit = (id, currentName, currentTime) => {
       const li = document.getElementById(`task-${id}`);
       li.innerHTML = `
         <div class="edit-wrapper">
           <input type="text" id="edit-name-${id}" value="${currentName}">
           <input type="time" id="edit-time-${id}" value="${currentTime}">
-          <select id="edit-ampm-${id}" class="ampm-select">
-            <option value="AM" ${currentAmPm === 'AM' ? 'selected' : ''}>AM</option>
-            <option value="PM" ${currentAmPm === 'PM' ? 'selected' : ''}>PM</option>
-          </select>
           <button class="save-btn" onclick="saveEdit('${id}')">Save</button>
         </div>
       `;
@@ -522,15 +486,13 @@
     window.saveEdit = async (id) => {
       const newName = document.getElementById(`edit-name-${id}`).value.trim();
       const newTime = document.getElementById(`edit-time-${id}`).value;
-      const newAmPm = document.getElementById(`edit-ampm-${id}`).value;
 
       if (!newName) return;
 
       const taskRef = doc(db, "daily_tasks", id);
       await updateDoc(taskRef, {
         name: newName,
-        time: newTime,
-        ampm: newAmPm
+        time: newTime
       });
     };
 
