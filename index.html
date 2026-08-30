@@ -453,7 +453,14 @@
       document.getElementById(`editBtnPM-${id}`).classList.toggle('active', period === 'PM');
     };
 
-    const getTodayString = () => new Date().toISOString().split('T')[0];
+    // Corrected to local timezone format (YYYY-MM-DD)
+    const getTodayString = () => {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
 
     const formatDisplayTime = (timeStr, ampm) => {
       if (!timeStr) return "";
@@ -463,7 +470,9 @@
       return `${h}:${minutes} ${ampm || 'AM'}`;
     };
 
-    onSnapshot(tasksCollection, (snapshot) => {
+    let currentSnapshot = null;
+
+    const renderTasks = (snapshot) => {
       const taskList = document.getElementById("taskList");
       taskList.innerHTML = "";
       const today = getTodayString();
@@ -474,6 +483,8 @@
       snapshot.forEach((docSnap) => {
         const task = docSnap.data();
         const taskId = docSnap.id;
+        
+        // Task is marked completed ONLY if lastCompletedDate matches TODAY's local date
         const isCompletedToday = task.lastCompletedDate === today;
 
         if (isCompletedToday) completedCount++;
@@ -521,7 +532,19 @@
         `;
         taskList.appendChild(li);
       });
+    };
+
+    onSnapshot(tasksCollection, (snapshot) => {
+      currentSnapshot = snapshot;
+      renderTasks(snapshot);
     });
+
+    // Automatically check every 15 seconds to auto-uncheck tasks as soon as local time turns 12:00 AM
+    setInterval(() => {
+      if (currentSnapshot) {
+        renderTasks(currentSnapshot);
+      }
+    }, 15000);
 
     window.addTask = async () => {
       const nameInput = document.getElementById("taskInput");
