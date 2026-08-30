@@ -331,25 +331,40 @@
       gap: 6px;
       width: 100%;
       align-items: center;
+      flex-wrap: wrap;
     }
 
     .edit-wrapper input[type="text"] {
-      flex: 2;
-      padding: 6px 10px;
+      flex: 1 1 100%;
+      padding: 8px 10px;
+    }
+
+    .edit-wrapper .time-picker-wrapper {
+      flex: 1;
     }
 
     .edit-wrapper input[type="time"] {
-      flex: 1;
       height: 36px;
       padding: 0 6px;
+    }
+
+    .edit-wrapper .ampm-toggle {
+      height: 36px;
+      padding: 2px;
+    }
+
+    .edit-wrapper .ampm-btn {
+      padding: 4px 8px;
+      font-size: 11px;
     }
 
     .save-btn {
       background: #34c759;
       color: white;
       border: none;
-      padding: 8px 12px;
-      border-radius: 6px;
+      padding: 8px 14px;
+      height: 36px;
+      border-radius: 8px;
       font-size: 12px;
       font-weight: 600;
       cursor: pointer;
@@ -424,11 +439,18 @@
     const tasksCollection = collection(db, "daily_tasks");
 
     let currentAMPM = 'AM';
+    const editAMPMState = {};
 
     window.setAMPM = (period) => {
       currentAMPM = period;
       document.getElementById('btnAM').classList.toggle('active', period === 'AM');
       document.getElementById('btnPM').classList.toggle('active', period === 'PM');
+    };
+
+    window.setEditAMPM = (id, period) => {
+      editAMPMState[id] = period;
+      document.getElementById(`editBtnAM-${id}`).classList.toggle('active', period === 'AM');
+      document.getElementById(`editBtnPM-${id}`).classList.toggle('active', period === 'PM');
     };
 
     const getTodayString = () => new Date().toISOString().split('T')[0];
@@ -493,7 +515,7 @@
             ${formattedTime ? `<span class="time-badge">${formattedTime}</span>` : ""}
           </div>
           <div class="actions">
-            <button class="icon-btn" onclick="enableEdit('${task.id}', '${task.name.replace(/'/g, "\\'")}', '${task.time}')">✏️</button>
+            <button class="icon-btn" onclick="enableEdit('${task.id}', '${task.name.replace(/'/g, "\\'")}', '${task.time}', '${task.ampm}')">✏️</button>
             <button class="icon-btn delete-btn" onclick="deleteTask('${task.id}')">✕</button>
           </div>
         `;
@@ -521,12 +543,19 @@
       });
     };
 
-    window.enableEdit = (id, currentName, currentTime) => {
+    window.enableEdit = (id, currentName, currentTime, currentAMPMVal) => {
+      editAMPMState[id] = currentAMPMVal || 'AM';
       const li = document.getElementById(`task-${id}`);
       li.innerHTML = `
         <div class="edit-wrapper">
           <input type="text" id="edit-name-${id}" value="${currentName}">
-          <input type="time" id="edit-time-${id}" value="${currentTime}">
+          <div class="time-picker-wrapper">
+            <input type="time" id="edit-time-${id}" value="${currentTime}">
+            <div class="ampm-toggle">
+              <button type="button" class="ampm-btn ${editAMPMState[id] === 'AM' ? 'active' : ''}" id="editBtnAM-${id}" onclick="setEditAMPM('${id}', 'AM')">AM</button>
+              <button type="button" class="ampm-btn ${editAMPMState[id] === 'PM' ? 'active' : ''}" id="editBtnPM-${id}" onclick="setEditAMPM('${id}', 'PM')">PM</button>
+            </div>
+          </div>
           <button class="save-btn" onclick="saveEdit('${id}')">Save</button>
         </div>
       `;
@@ -535,6 +564,7 @@
     window.saveEdit = async (id) => {
       const newName = document.getElementById(`edit-name-${id}`).value.trim();
       const newTime = document.getElementById(`edit-time-${id}`).value;
+      const selectedAMPM = editAMPMState[id] || 'AM';
 
       if (!newName) return;
 
@@ -542,8 +572,10 @@
       await updateDoc(taskRef, {
         name: newName,
         time: newTime,
-        ampm: currentAMPM
+        ampm: selectedAMPM
       });
+
+      delete editAMPMState[id];
     };
 
     document.getElementById("taskInput").addEventListener("keypress", (e) => {
