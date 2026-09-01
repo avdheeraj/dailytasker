@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Aesthetic Daily Tasks</title>
+  <title>Aesthetic Daily Tasks & Reports</title>
   <style>
     /* Reset & Modern Aesthetic Font */
     * {
@@ -48,7 +48,7 @@
       align-items: center;
       justify-content: center;
       gap: 10px;
-      margin-bottom: 25px;
+      margin-bottom: 20px;
     }
 
     .header-icon {
@@ -60,6 +60,43 @@
       color: #222;
       font-weight: 700;
       letter-spacing: -0.5px;
+    }
+
+    /* Tab Navigation Bar */
+    .tab-bar {
+      display: flex;
+      gap: 8px;
+      background: rgba(0, 0, 0, 0.04);
+      padding: 4px;
+      border-radius: 12px;
+      margin-bottom: 25px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      background: transparent;
+      font-size: 13px;
+      font-weight: 600;
+      color: #666;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+      background: #ffffff;
+      color: #222;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
     }
 
     /* Progress Bar */
@@ -90,6 +127,37 @@
       background: linear-gradient(90deg, #34c759, #85e098);
       border-radius: 10px;
       transition: width 0.4s ease-out;
+    }
+
+    /* Weekly Report Styling */
+    .weekly-report-container {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .report-card {
+      background: rgba(255, 255, 255, 0.6);
+      padding: 16px;
+      border-radius: 12px;
+      border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .report-card-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #333;
+    }
+
+    .month-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #6366f1;
+      margin-bottom: 15px;
+      text-align: center;
     }
 
     /* Inputs Group */
@@ -390,33 +458,48 @@
       <h2>Aesthetic Daily</h2>
     </div>
 
-    <!-- Progress Bar -->
-    <div class="progress-container">
-      <div class="progress-label">
-        <span>Daily Progress</span>
-        <span id="progressText">0%</span>
-      </div>
-      <div class="progress-bar-background">
-        <div class="progress-bar-fill" id="progressBarFill"></div>
-      </div>
+    <!-- Navigation Tabs -->
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="switchTab('daily')">Daily Tasks</button>
+      <button class="tab-btn" onclick="switchTab('weekly')">Weekly Report</button>
     </div>
 
-    <!-- Inputs -->
-    <div class="input-group">
-      <input type="text" id="taskInput" placeholder="Add a ritual or task...">
-      
-      <div class="time-picker-wrapper">
-        <input type="time" id="timeInput">
-        <div class="ampm-toggle">
-          <button type="button" class="ampm-btn active" id="btnAM" onclick="setAMPM('AM')">AM</button>
-          <button type="button" class="ampm-btn" id="btnPM" onclick="setAMPM('PM')">PM</button>
+    <!-- Daily Tasks Tab -->
+    <div id="dailyTab" class="tab-content active">
+      <!-- Progress Bar -->
+      <div class="progress-container">
+        <div class="progress-label">
+          <span>Daily Progress</span>
+          <span id="progressText">0%</span>
+        </div>
+        <div class="progress-bar-background">
+          <div class="progress-bar-fill" id="progressBarFill"></div>
         </div>
       </div>
 
-      <button class="add-btn" onclick="addTask()">Add Task</button>
+      <!-- Inputs -->
+      <div class="input-group">
+        <input type="text" id="taskInput" placeholder="Add a ritual or task...">
+        
+        <div class="time-picker-wrapper">
+          <input type="time" id="timeInput">
+          <div class="ampm-toggle">
+            <button type="button" class="ampm-btn active" id="btnAM" onclick="setAMPM('AM')">AM</button>
+            <button type="button" class="ampm-btn" id="btnPM" onclick="setAMPM('PM')">PM</button>
+          </div>
+        </div>
+
+        <button class="add-btn" onclick="addTask()">Add Task</button>
+      </div>
+
+      <ul id="taskList"></ul>
     </div>
 
-    <ul id="taskList"></ul>
+    <!-- Weekly Report Tab -->
+    <div id="weeklyTab" class="tab-content">
+      <div class="month-title" id="currentMonthLabel"></div>
+      <div class="weekly-report-container" id="weeklyReportContainer"></div>
+    </div>
   </div>
 
   <script type="module">
@@ -441,6 +524,19 @@
     let currentAMPM = 'AM';
     const editAMPMState = {};
 
+    window.switchTab = (tab) => {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+      if (tab === 'daily') {
+        document.querySelectorAll('.tab-btn')[0].classList.add('active');
+        document.getElementById('dailyTab').classList.add('active');
+      } else {
+        document.querySelectorAll('.tab-btn')[1].classList.add('active');
+        document.getElementById('weeklyTab').classList.add('active');
+      }
+    };
+
     window.setAMPM = (period) => {
       currentAMPM = period;
       document.getElementById('btnAM').classList.toggle('active', period === 'AM');
@@ -453,7 +549,6 @@
       document.getElementById(`editBtnPM-${id}`).classList.toggle('active', period === 'PM');
     };
 
-    // Corrected to local timezone format (YYYY-MM-DD)
     const getTodayString = () => {
       const now = new Date();
       const year = now.getFullYear();
@@ -484,7 +579,7 @@
         const task = docSnap.data();
         const taskId = docSnap.id;
         
-        // Task is marked completed ONLY if lastCompletedDate matches TODAY's local date
+        // Unchecks checkbox on new day while retaining task in list
         const isCompletedToday = task.lastCompletedDate === today;
 
         if (isCompletedToday) completedCount++;
@@ -494,7 +589,8 @@
           name: task.name,
           time: task.time || "",
           ampm: task.ampm || "AM",
-          completed: isCompletedToday
+          completed: isCompletedToday,
+          completionHistory: task.completionHistory || []
         });
       });
 
@@ -532,6 +628,66 @@
         `;
         taskList.appendChild(li);
       });
+
+      renderWeeklyReport(tasks);
+    };
+
+    const renderWeeklyReport = (tasks) => {
+      const container = document.getElementById("weeklyReportContainer");
+      container.innerHTML = "";
+
+      const now = new Date();
+      const currentMonth = now.getMonth();
+      const currentYear = now.getFullYear();
+
+      const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+      document.getElementById("currentMonthLabel").innerText = `${monthNames[currentMonth]} ${currentYear} Report`;
+
+      const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+      const totalPossibleTasksPerDay = tasks.length;
+
+      const weeks = [
+        { label: "Week 1 (Days 1–7)", start: 1, end: 7 },
+        { label: "Week 2 (Days 8–14)", start: 8, end: 14 },
+        { label: "Week 3 (Days 15–21)", start: 15, end: 21 },
+        { label: "Week 4 (Days 22–28)", start: 22, end: 28 },
+      ];
+
+      if (daysInMonth > 28) {
+        weeks.push({ label: `Week 5 (Days 29–${daysInMonth})`, start: 29, end: daysInMonth });
+      }
+
+      weeks.forEach((week) => {
+        let weekCompletedCount = 0;
+        let weekPossibleCount = 0;
+
+        for (let d = week.start; d <= week.end; d++) {
+          const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+          
+          weekPossibleCount += totalPossibleTasksPerDay;
+
+          tasks.forEach(task => {
+            if (task.completionHistory && task.completionHistory.includes(dateStr)) {
+              weekCompletedCount++;
+            }
+          });
+        }
+
+        const percentage = weekPossibleCount === 0 ? 0 : Math.round((weekCompletedCount / weekPossibleCount) * 100);
+
+        const card = document.createElement("div");
+        card.className = "report-card";
+        card.innerHTML = `
+          <div class="report-card-header">
+            <span>${week.label}</span>
+            <span>${percentage}%</span>
+          </div>
+          <div class="progress-bar-background">
+            <div class="progress-bar-fill" style="width: ${percentage}%"></div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
     };
 
     onSnapshot(tasksCollection, (snapshot) => {
@@ -539,7 +695,6 @@
       renderTasks(snapshot);
     });
 
-    // Automatically check every 15 seconds to auto-uncheck tasks as soon as local time turns 12:00 AM
     setInterval(() => {
       if (currentSnapshot) {
         renderTasks(currentSnapshot);
@@ -562,7 +717,8 @@
         name: text,
         time: selectedTime,
         ampm: currentAMPM,
-        lastCompletedDate: null
+        lastCompletedDate: null,
+        completionHistory: []
       });
     };
 
@@ -605,10 +761,26 @@
       if (e.key === "Enter") window.addTask();
     });
 
+    // Directly links daily checkbox toggles to the weekly report calculation
     window.toggleTask = async (id, isChecked) => {
+      const today = getTodayString();
       const taskRef = doc(db, "daily_tasks", id);
+
+      let history = [];
+      const docSnap = currentSnapshot.docs.find(d => d.id === id);
+      if (docSnap && docSnap.data().completionHistory) {
+        history = [...docSnap.data().completionHistory];
+      }
+
+      if (isChecked) {
+        if (!history.includes(today)) history.push(today);
+      } else {
+        history = history.filter(date => date !== today);
+      }
+
       await updateDoc(taskRef, {
-        lastCompletedDate: isChecked ? getTodayString() : null
+        lastCompletedDate: isChecked ? today : null,
+        completionHistory: history
       });
     };
 
