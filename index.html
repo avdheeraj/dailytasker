@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Aesthetic Daily Tasks & Reports</title>
   <style>
-    /* Reset & Modern Aesthetic Font */
     * {
       box-sizing: border-box;
       margin: 0;
@@ -13,7 +12,6 @@
       font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
 
-    /* Atmospheric Background Gradient */
     body {
       background-image: 
         radial-gradient(at 0% 0%, hsla(253, 16%, 7%, 1) 0px, transparent 50%),
@@ -29,7 +27,6 @@
       color: #333;
     }
 
-    /* Main "Glassmorphism" Container */
     .container {
       width: 100%;
       max-width: 520px;
@@ -42,7 +39,6 @@
       border: 1px solid rgba(255, 255, 255, 0.2);
     }
 
-    /* Header Styling */
     .header {
       display: flex;
       align-items: center;
@@ -51,9 +47,7 @@
       margin-bottom: 20px;
     }
 
-    .header-icon {
-      font-size: 28px;
-    }
+    .header-icon { font-size: 28px; }
 
     h2 {
       font-size: 24px;
@@ -62,7 +56,6 @@
       letter-spacing: -0.5px;
     }
 
-    /* Tab Navigation Bar */
     .tab-bar {
       display: flex;
       gap: 8px;
@@ -91,18 +84,10 @@
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     }
 
-    .tab-content {
-      display: none;
-    }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
 
-    .tab-content.active {
-      display: block;
-    }
-
-    /* Progress Bar */
-    .progress-container {
-      margin-bottom: 30px;
-    }
+    .progress-container { margin-bottom: 30px; }
 
     .progress-label {
       display: flex;
@@ -129,7 +114,6 @@
       transition: width 0.4s ease-out;
     }
 
-    /* Weekly Report Styling */
     .weekly-report-container {
       display: flex;
       flex-direction: column;
@@ -148,8 +132,14 @@
       justify-content: space-between;
       font-size: 14px;
       font-weight: 600;
-      margin-bottom: 8px;
+      margin-bottom: 4px;
       color: #333;
+    }
+
+    .report-card-sub {
+      font-size: 11px;
+      color: #777;
+      margin-bottom: 10px;
     }
 
     .month-title {
@@ -160,7 +150,6 @@
       text-align: center;
     }
 
-    /* Inputs Group */
     .input-group {
       display: flex;
       gap: 10px;
@@ -185,7 +174,6 @@
       box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
     }
 
-    /* Time Box & AM/PM Selector Wrapper */
     .time-picker-wrapper {
       display: flex;
       gap: 6px;
@@ -254,10 +242,7 @@
       transform: translateY(-1px);
     }
 
-    /* Task List Items */
-    ul {
-      list-style: none;
-    }
+    ul { list-style: none; }
 
     li {
       display: flex;
@@ -296,7 +281,6 @@
       flex: 1;
     }
 
-    /* Checkbox Styling */
     li input[type="checkbox"] {
       appearance: none;
       -webkit-appearance: none;
@@ -329,11 +313,8 @@
       background-color: rgba(52, 199, 89, 0.05);
     }
 
-    li input[type="checkbox"]:checked::before {
-      transform: scale(1);
-    }
+    li input[type="checkbox"]:checked::before { transform: scale(1); }
 
-    /* Time Badge */
     .time-badge {
       font-size: 12px;
       background: #f1f0ff;
@@ -344,7 +325,6 @@
       white-space: nowrap;
     }
 
-    /* Completed Task Style */
     li.completed {
       background-color: rgba(0, 0, 0, 0.02) !important;
       opacity: 0.6;
@@ -362,7 +342,6 @@
       color: #888;
     }
 
-    /* Action Buttons */
     .actions {
       display: flex;
       align-items: center;
@@ -385,15 +364,9 @@
       background: rgba(0, 0, 0, 0.05);
     }
 
-    .delete-btn {
-      color: #ff3b30;
-    }
+    .delete-btn { color: #ff3b30; }
+    .delete-btn:hover { background: #ffe5e5; }
 
-    .delete-btn:hover {
-      background: #ffe5e5;
-    }
-
-    /* Inline Edit Form */
     .edit-wrapper {
       display: flex;
       gap: 6px;
@@ -407,9 +380,7 @@
       padding: 8px 10px;
     }
 
-    .edit-wrapper .time-picker-wrapper {
-      flex: 1;
-    }
+    .edit-wrapper .time-picker-wrapper { flex: 1; }
 
     .edit-wrapper input[type="time"] {
       height: 36px;
@@ -438,7 +409,6 @@
       cursor: pointer;
     }
 
-    /* Mobile Responsive Optimizations */
     @media (max-width: 480px) {
       body { padding: 25px 12px; }
       .container { padding: 22px 18px; border-radius: 16px; }
@@ -458,15 +428,12 @@
       <h2>Aesthetic Daily</h2>
     </div>
 
-    <!-- Navigation Tabs -->
     <div class="tab-bar">
       <button class="tab-btn active" onclick="switchTab('daily')">Daily Tasks</button>
       <button class="tab-btn" onclick="switchTab('weekly')">Weekly Report</button>
     </div>
 
-    <!-- Daily Tasks Tab -->
     <div id="dailyTab" class="tab-content active">
-      <!-- Progress Bar -->
       <div class="progress-container">
         <div class="progress-label">
           <span>Daily Progress</span>
@@ -477,7 +444,6 @@
         </div>
       </div>
 
-      <!-- Inputs -->
       <div class="input-group">
         <input type="text" id="taskInput" placeholder="Add a ritual or task...">
         
@@ -495,7 +461,6 @@
       <ul id="taskList"></ul>
     </div>
 
-    <!-- Weekly Report Tab -->
     <div id="weeklyTab" class="tab-content">
       <div class="month-title" id="currentMonthLabel"></div>
       <div class="weekly-report-container" id="weeklyReportContainer"></div>
@@ -506,7 +471,6 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    // FIREBASE CONFIGURATION
     const firebaseConfig = {
       apiKey: "AIzaSyDjl8nxOw-0lcm80d7wNnquLrzweBzZ6y0",
       authDomain: "dailytasker-41b93.firebaseapp.com",
@@ -579,9 +543,7 @@
         const task = docSnap.data();
         const taskId = docSnap.id;
         
-        // Unchecks checkbox on new day while retaining task in list
         const isCompletedToday = task.lastCompletedDate === today;
-
         if (isCompletedToday) completedCount++;
 
         tasks.push({
@@ -639,6 +601,7 @@
       const now = new Date();
       const currentMonth = now.getMonth();
       const currentYear = now.getFullYear();
+      const todayDateNumber = now.getDate();
 
       const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
       document.getElementById("currentMonthLabel").innerText = `${monthNames[currentMonth]} ${currentYear} Report`;
@@ -659,21 +622,30 @@
 
       weeks.forEach((week) => {
         let weekCompletedCount = 0;
-        let weekPossibleCount = 0;
+        let weekElapsedDays = 0;
 
         for (let d = week.start; d <= week.end; d++) {
-          const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-          
-          weekPossibleCount += totalPossibleTasksPerDay;
+          if (d <= todayDateNumber) {
+            weekElapsedDays++;
+            const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
 
-          tasks.forEach(task => {
-            if (task.completionHistory && task.completionHistory.includes(dateStr)) {
-              weekCompletedCount++;
-            }
-          });
+            tasks.forEach(task => {
+              if (task.completionHistory && task.completionHistory.includes(dateStr)) {
+                weekCompletedCount++;
+              }
+            });
+          }
         }
 
-        const percentage = weekPossibleCount === 0 ? 0 : Math.round((weekCompletedCount / weekPossibleCount) * 100);
+        const totalPossibleTasksSoFar = weekElapsedDays * totalPossibleTasksPerDay;
+        const percentage = totalPossibleTasksSoFar === 0 ? 0 : Math.round((weekCompletedCount / totalPossibleTasksSoFar) * 100);
+
+        let statusSubtitle = "";
+        if (todayDateNumber < week.start) {
+          statusSubtitle = "Upcoming week";
+        } else {
+          statusSubtitle = `${weekCompletedCount} / ${totalPossibleTasksSoFar} tasks completed (${weekElapsedDays} day${weekElapsedDays > 1 ? 's' : ''} logged)`;
+        }
 
         const card = document.createElement("div");
         card.className = "report-card";
@@ -682,6 +654,7 @@
             <span>${week.label}</span>
             <span>${percentage}%</span>
           </div>
+          <div class="report-card-sub">${statusSubtitle}</div>
           <div class="progress-bar-background">
             <div class="progress-bar-fill" style="width: ${percentage}%"></div>
           </div>
@@ -761,7 +734,6 @@
       if (e.key === "Enter") window.addTask();
     });
 
-    // Directly links daily checkbox toggles to the weekly report calculation
     window.toggleTask = async (id, isChecked) => {
       const today = getTodayString();
       const taskRef = doc(db, "daily_tasks", id);
