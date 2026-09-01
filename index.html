@@ -174,18 +174,10 @@
       box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
     }
 
-    .time-picker-wrapper {
-      display: flex;
-      gap: 6px;
-      flex: 1;
-      align-items: center;
-    }
-
     input[type="time"] {
       flex: 1;
-      min-width: 90px;
       height: 44px;
-      padding: 0 10px;
+      padding: 0 12px;
       font-size: 14px;
       color: #333;
       background-color: rgba(0, 0, 0, 0.04);
@@ -193,34 +185,6 @@
       border-radius: 10px;
       outline: none;
       transition: all 0.2s;
-    }
-
-    .ampm-toggle {
-      display: flex;
-      background-color: rgba(0, 0, 0, 0.04);
-      border: 1px solid rgba(0, 0, 0, 0.08);
-      border-radius: 10px;
-      padding: 3px;
-      height: 44px;
-      align-items: center;
-    }
-
-    .ampm-btn {
-      background: transparent;
-      border: none;
-      padding: 6px 10px;
-      font-size: 12px;
-      font-weight: 700;
-      color: #666;
-      border-radius: 7px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .ampm-btn.active {
-      background-color: #6366f1;
-      color: white;
-      box-shadow: 0 2px 6px rgba(99, 102, 241, 0.3);
     }
 
     button.add-btn {
@@ -380,21 +344,9 @@
       padding: 8px 10px;
     }
 
-    .edit-wrapper .time-picker-wrapper { flex: 1; }
-
     .edit-wrapper input[type="time"] {
       height: 36px;
       padding: 0 6px;
-    }
-
-    .edit-wrapper .ampm-toggle {
-      height: 36px;
-      padding: 2px;
-    }
-
-    .edit-wrapper .ampm-btn {
-      padding: 4px 8px;
-      font-size: 11px;
     }
 
     .save-btn {
@@ -414,8 +366,8 @@
       .container { padding: 22px 18px; border-radius: 16px; }
       .input-group { gap: 8px; }
       input[type="text"] { flex-basis: 100%; }
-      .time-picker-wrapper { flex: 1 1 55%; }
-      button.add-btn { flex: 1 1 40%; }
+      input[type="time"] { flex: 1 1 48%; }
+      button.add-btn { flex: 1 1 48%; }
     }
   </style>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
@@ -446,15 +398,7 @@
 
       <div class="input-group">
         <input type="text" id="taskInput" placeholder="Add a ritual or task...">
-        
-        <div class="time-picker-wrapper">
-          <input type="time" id="timeInput">
-          <div class="ampm-toggle">
-            <button type="button" class="ampm-btn active" id="btnAM" onclick="setAMPM('AM')">AM</button>
-            <button type="button" class="ampm-btn" id="btnPM" onclick="setAMPM('PM')">PM</button>
-          </div>
-        </div>
-
+        <input type="time" id="timeInput">
         <button class="add-btn" onclick="addTask()">Add Task</button>
       </div>
 
@@ -485,9 +429,6 @@
     const db = getFirestore(app);
     const tasksCollection = collection(db, "daily_tasks");
 
-    let currentAMPM = 'AM';
-    const editAMPMState = {};
-
     window.switchTab = (tab) => {
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
@@ -501,18 +442,6 @@
       }
     };
 
-    window.setAMPM = (period) => {
-      currentAMPM = period;
-      document.getElementById('btnAM').classList.toggle('active', period === 'AM');
-      document.getElementById('btnPM').classList.toggle('active', period === 'PM');
-    };
-
-    window.setEditAMPM = (id, period) => {
-      editAMPMState[id] = period;
-      document.getElementById(`editBtnAM-${id}`).classList.toggle('active', period === 'AM');
-      document.getElementById(`editBtnPM-${id}`).classList.toggle('active', period === 'PM');
-    };
-
     const getTodayString = () => {
       const now = new Date();
       const year = now.getFullYear();
@@ -521,12 +450,13 @@
       return `${year}-${month}-${day}`;
     };
 
-    const formatDisplayTime = (timeStr, ampm) => {
+    const formatDisplayTime = (timeStr) => {
       if (!timeStr) return "";
       let [hours, minutes] = timeStr.split(":");
       let h = parseInt(hours, 10);
+      const ampm = h >= 12 ? 'PM' : 'AM';
       h = h % 12 || 12;
-      return `${h}:${minutes} ${ampm || 'AM'}`;
+      return `${h}:${minutes} ${ampm}`;
     };
 
     let currentSnapshot = null;
@@ -550,7 +480,6 @@
           id: taskId,
           name: task.name,
           time: task.time || "",
-          ampm: task.ampm || "AM",
           completed: isCompletedToday,
           completionHistory: task.completionHistory || []
         });
@@ -573,7 +502,7 @@
         li.id = `task-${task.id}`;
         if (task.completed) li.classList.add("completed");
 
-        const formattedTime = formatDisplayTime(task.time, task.ampm);
+        const formattedTime = formatDisplayTime(task.time);
 
         li.innerHTML = `
           <div class="task-content">
@@ -584,7 +513,7 @@
             ${formattedTime ? `<span class="time-badge">${formattedTime}</span>` : ""}
           </div>
           <div class="actions">
-            <button class="icon-btn" onclick="enableEdit('${task.id}', '${task.name.replace(/'/g, "\\'")}', '${task.time}', '${task.ampm}')">✏️</button>
+            <button class="icon-btn" onclick="enableEdit('${task.id}', '${task.name.replace(/'/g, "\\'")}', '${task.time}')">✏️</button>
             <button class="icon-btn delete-btn" onclick="deleteTask('${task.id}')">✕</button>
           </div>
         `;
@@ -689,25 +618,17 @@
       await addDoc(tasksCollection, {
         name: text,
         time: selectedTime,
-        ampm: currentAMPM,
         lastCompletedDate: null,
         completionHistory: []
       });
     };
 
-    window.enableEdit = (id, currentName, currentTime, currentAMPMVal) => {
-      editAMPMState[id] = currentAMPMVal || 'AM';
+    window.enableEdit = (id, currentName, currentTime) => {
       const li = document.getElementById(`task-${id}`);
       li.innerHTML = `
         <div class="edit-wrapper">
           <input type="text" id="edit-name-${id}" value="${currentName}">
-          <div class="time-picker-wrapper">
-            <input type="time" id="edit-time-${id}" value="${currentTime}">
-            <div class="ampm-toggle">
-              <button type="button" class="ampm-btn ${editAMPMState[id] === 'AM' ? 'active' : ''}" id="editBtnAM-${id}" onclick="setEditAMPM('${id}', 'AM')">AM</button>
-              <button type="button" class="ampm-btn ${editAMPMState[id] === 'PM' ? 'active' : ''}" id="editBtnPM-${id}" onclick="setEditAMPM('${id}', 'PM')">PM</button>
-            </div>
-          </div>
+          <input type="time" id="edit-time-${id}" value="${currentTime}">
           <button class="save-btn" onclick="saveEdit('${id}')">Save</button>
         </div>
       `;
@@ -716,18 +637,14 @@
     window.saveEdit = async (id) => {
       const newName = document.getElementById(`edit-name-${id}`).value.trim();
       const newTime = document.getElementById(`edit-time-${id}`).value;
-      const selectedAMPM = editAMPMState[id] || 'AM';
 
       if (!newName) return;
 
       const taskRef = doc(db, "daily_tasks", id);
       await updateDoc(taskRef, {
         name: newName,
-        time: newTime,
-        ampm: selectedAMPM
+        time: newTime
       });
-
-      delete editAMPMState[id];
     };
 
     document.getElementById("taskInput").addEventListener("keypress", (e) => {
